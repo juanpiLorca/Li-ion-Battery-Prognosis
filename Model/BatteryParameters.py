@@ -1,6 +1,6 @@
 class BatteryParameters:
     # Define class attributes for constants and parameters
-    sampleTime = 1.0
+    sampleTime = 10.0        # sample time in seconds
 
     capacity = 2.2           # battery capacity in Ah
     qMobile = capacity*3600  # maximum mobile charge (Li ions) in the battery ==> Related to battery capacity by qMobile = C * 3600, where C is the capacity in Ah
@@ -84,7 +84,7 @@ class BatteryParameters:
     An12 = 0
 
     # End of discharge voltage threshold
-    VEOD = 3.0
+    VEOD = 3.2
 
     # Default initial conditions (fully charged)
     def __init__(self):

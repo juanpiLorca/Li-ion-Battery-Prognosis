@@ -97,7 +97,6 @@ class BatteryCellPhy():
         ])
         return x0
 
-
     def getNextState(self, x, u): 
         """
         Computes the next state of the battery model given the current state and input
@@ -111,10 +110,8 @@ class BatteryCellPhy():
         i_app = u
 
         Tbdot = 0.0
-        xpS = qpS/self.parameters.qpSMax
-        xnS = qnS/self.parameters.qnSMax
-        if xnS >= 1.0:                          # Needed for the case when the negative electrode is fully charged
-            xnS -= 1e-6                        
+        xpS = np.clip(qpS / self.parameters.qpSMax, 1e-8, 1 - 1e-6)
+        xnS = np.clip(qnS / self.parameters.qnSMax, 1e-8, 1 - 1e-6)                 
 
         CnBulk = qnB/self.parameters.VolB
         CnSurface = qnS/self.parameters.VolS

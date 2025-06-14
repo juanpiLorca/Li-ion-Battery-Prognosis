@@ -96,10 +96,10 @@ if __name__ == '__main__':
 
     # Example of plotting the first discharge sequence for RW12
     print(45* '-')
-    np.save('DischargeReference/data_RW.npy', data_RW[idx_example][0, :])
+    np.save('DischargeReference/data_RW.npy', data_RW[idx_example][-1, :])
     
     print('Plotting discharge sequence for RW12...')
-    print('Shape of the first discharge sequence for RW12:', data_RW[idx_example][0, :].shape)
+    print('Shape of the first discharge sequence for RW12:', data_RW[idx_example][-1, :].shape)
     plt.figure(figsize=(10, 5))
     plt.plot(data_RW[idx_example][0, :], label='Voltage', color='blue')
     plt.xlabel('Time Steps')
