@@ -161,10 +161,8 @@ class BatteryCellPhy():
         i_app = u
 
         # Compute the interfacial voltages 
-        xpS = qpS / self.parameters.qpSMax
-        xnS = qnS / self.parameters.qnSMax
-        if xnS >= 1.0:                              # Needed for the case when the negative electrode is fully charged
-            xnS -= 1e-6                 
+        xpS = np.clip(qpS / self.parameters.qpSMax, 1e-8, 1 - 1e-6)
+        xnS = np.clip(qnS / self.parameters.qnSMax, 1e-8, 1 - 1e-6)                 
         VINTp = self.VINTp.getVINT(xpS)
         VINTn = self.VINTn.getVINT(xnS)
 
