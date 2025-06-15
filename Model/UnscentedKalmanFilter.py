@@ -3,7 +3,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from filterpy.kalman import UnscentedKalmanFilter as UKF
 from filterpy.kalman import MerweScaledSigmaPoints
-
 from BatteryParameters import BatteryParameters
 from BatteryModels import BatteryCellPhy
 
@@ -84,10 +83,10 @@ class BatteryUKF:
 
 
 if __name__ == "__main__":
-    data_voltage = '../data/voltage/voltage_trace_01.csv'
+    data_voltage = '../data/RW9_Voltage_Discharge_Reference/voltage_trace_01.csv'
     voltage_measurements = pd.read_csv(data_voltage)
     voltage_measurements = voltage_measurements["voltage"]
-    data_current = '../data/current/current_trace_01.csv'
+    data_current = '../data/RW9_Current_Discharge_Reference/current_trace_01.csv'
     current_inputs = pd.read_csv(data_current)
     current_inputs = current_inputs["current"]
 
@@ -106,15 +105,15 @@ if __name__ == "__main__":
         state_estimates.append(x_est)
         output_estimates.append(ukf.hx(x_est)[0])
 
-    plt.figure(figsize=(12, 6))
-    plt.plot(voltage_measurements, label='Measured Voltage', color='blue')
-    plt.plot(output_estimates, label='Estimated Voltage', color='orange')
-    plt.xlabel('Time Step')
+    plt.figure(figsize=(10, 5))
+    plt.plot(np.arange(len(current_inputs))*dt, voltage_measurements, label=r'$V(t)$', color='grey')
+    plt.plot(np.arange(len(current_inputs))*dt, output_estimates, label=r'$\hat{V}(t)$', color='black', linestyle='--')
+    plt.xlabel('Time (s)')
     plt.ylabel('Voltage (V)')
-    plt.title('Battery Voltage Estimation using UKF')
-    plt.legend()
+    plt.title(f'Battery Voltage Estimation using UKF @ 1.0 (A)')
     plt.grid()
-    plt.savefig('battery_voltage_estimation.png')
+    plt.legend()
+    plt.savefig('imgs/ukf_battery_voltage_estimation.pdf')
     plt.close()
 
     

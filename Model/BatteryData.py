@@ -91,23 +91,25 @@ if __name__ == '__main__':
     end = time.time()
     print('Data loaded in {:.2f} seconds'.format(end - start))
 
-    idx_example = 12
-    print('Shape of data for RW12:', data_RW[idx_example].shape)
+    idx_example = 9
+    print('Shape of data for RW{}:'.format(idx_example), data_RW[idx_example].shape)
 
-    # Example of plotting the first discharge sequence for RW12
-    print(45* '-')
-    np.save('DischargeReference/data_RW.npy', data_RW[idx_example][-1, :])
-    
-    print('Plotting discharge sequence for RW12...')
-    print('Shape of the first discharge sequence for RW12:', data_RW[idx_example][-1, :].shape)
+    # --- Random Walk 9 data ---
+    # >>> shaped (240, 757)
+    # >>> First 80 sequences is voltage, next 80 is current, last 80 is relative time
+
+    print('Plotting discharge sequence for RW{}...'.format(idx_example))
+    print('Shape of the first discharge sequence for RW{}:'.format(idx_example), data_RW[idx_example][0, :].shape)
     plt.figure(figsize=(10, 5))
-    plt.plot(data_RW[idx_example][0, :], label='Voltage', color='blue')
+
+    for k in range(80):
+        plt.plot(data_RW[idx_example][k, :], "k", alpha=0.5)
+
     plt.xlabel('Time Steps')
     plt.ylabel('Voltage (V)')
-    plt.title('Discharge Sequence for RW12')
-    plt.legend()
+    plt.title('Discharge Sequence Voltage Profile for RW{}'.format(idx_example))
     plt.grid()
-    plt.savefig('imgs/discharge_sequence_RW12.pdf')
+    plt.savefig('imgs/discharge_sequence_RW{}.pdf'.format(idx_example))
     plt.close()
 
 
