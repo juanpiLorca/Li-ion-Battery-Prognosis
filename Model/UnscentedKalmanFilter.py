@@ -289,7 +289,7 @@ if __name__ == "__main__":
     plt.title(f'Battery Voltage Estimation using UKF @ 1.0 (A)')
     plt.grid()
     plt.legend()
-    plt.savefig('imgs/ukf_battery_voltage_estimation.pdf')
+    plt.savefig('imgs/lib_ukf_battery_voltage_estimation.pdf')
     plt.close()
 
     

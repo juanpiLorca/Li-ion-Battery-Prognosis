@@ -1,12 +1,11 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from UnscentedKalmanFilter import UKFLithiumBattery  
+from utils import plot_outputs, plot_states, compare_UKFs
+from UnscentedKalmanFilter import UKFLithiumBattery, BatteryUKF 
 from BatteryModels import BatteryCellPhy
 
 
 def main(): 
-
     data_voltage = '../data/RW9_Voltage_Discharge_Reference/voltage_trace_01.csv'
     voltage_measurements = pd.read_csv(data_voltage)["voltage"].to_numpy()
 
@@ -15,56 +14,52 @@ def main():
 
     assert len(voltage_measurements) == len(current_inputs), "Voltage and current trace lengths do not match."
 
-    # --- Initialize UKF ---
-    dt = 10.0               # [s]
-    ukf = UKFLithiumBattery(dt=dt, num_time_steps=len(current_inputs))
-    # Optional: Set a custom initial state (if you want)
-    # x0 = np.array([...])  # length = 8
-    # ukf.reset(x0=x0)
-
+    # --- Initialize the battery model ---
     eod_threshold = 3.2     # [V]
+    dt = 10.0               # [s]
     battery = BatteryCellPhy(dt=dt, eod_threshold=eod_threshold)
     x0 = battery.initialize()
     x = x0.copy()
-    V = np.zeros(len(current_inputs))               
 
+    # --- Initialize UKF ---
+    ukfNasa = UKFLithiumBattery(dt=dt, num_time_steps=len(current_inputs))
+    # Optional: Set a custom initial state (if you want)
+    # x0 = np.array([...])  # length = 8
+    # ukf.reset(x0=x0)
+    ukf = BatteryUKF(battery, dt=dt)
+
+    # --- Run the battery model to generate voltage predictions ---
+    x_model = np.zeros((len(current_inputs), len(x0)))
+    V_model = np.zeros(len(current_inputs))               
     for k in range(len(current_inputs)):
+        x_model[k] = x
         i_app = current_inputs[k]
         x = battery.getNextState(x, i_app)
         z = battery.getNextOutput(x, i_app)
-        V[k] = z
+        V_model[k] = z
 
     # --- Run the UKF over the input data ---
+    xh_k = np.zeros((len(current_inputs), len(x0)))
+    yh_k = np.zeros((len(current_inputs), 1))
     for u_k, y_k in zip(current_inputs, voltage_measurements):
-        ukf.step(u_k, y_k)
+
+        ukfNasa.step(u_k, y_k)
+
+        x_est = ukf.step(y_k, u_k)
+        xh_k[ukfNasa.step_counter-1] = x_est
+        yh_k[ukfNasa.step_counter-1] = ukf.hx(x_est)[0]
 
     # --- Retrieve history ---
-    x_k, y_k = ukf.get_history()
-
-     # --- Plot voltage prediction ---
+    x_k, y_k = ukfNasa.get_history()
     t = np.arange(len(voltage_measurements)) * dt
 
-    plt.figure(figsize=(12, 6))
-    plt.plot(t, voltage_measurements, label="Measured Voltage", 
-             color='tab:blue', linewidth=1.5, alpha=0.9)
-    plt.plot(t, y_k[:, 0], label="UKF Estimated Voltage", 
-             color='tab:orange', linewidth=2.0, linestyle='-')
-    plt.plot(t, V, label="Battery Model Voltage", 
-             color='tab:green', linewidth=2.0, linestyle='--')
-
-    eod_idx = np.where(V < 3.2)[0]
-    if len(eod_idx) > 0:
-        plt.axvline(t[eod_idx[0]], color='gray', linestyle=':', linewidth=1)
-        plt.text(t[eod_idx[0]], 3.25, 'EOD Threshold', rotation=90,
-                 verticalalignment='bottom', color='gray')
-
-    plt.xlabel("Time [s]", fontsize=12)
-    plt.ylabel("Voltage [V]", fontsize=12)
-    plt.title("UKF Battery Voltage Estimation vs Ground Truth", fontsize=14)
-    plt.legend(fontsize=10, loc='best')
-    plt.grid(True, linestyle=':', alpha=0.6)
-    plt.tight_layout()
-    plt.savefig('imgs/ukf_battery_voltage_estimation.pdf', dpi=300)
+    # --- Plot voltage prediction ---
+    plot_outputs(t, voltage_measurements, V_model, y_k)
+    # --- Plot states ---
+    plot_states(t, x_model, x_k)
+    # --- Compare UKFs ---
+    labels = ["UKF Local Implentation", "UKF FilterPy Lib."]
+    compare_UKFs(t, y_k, yh_k, label1=labels[0], label2=labels[1], V_ref=voltage_measurements)
 
 
 if __name__ == "__main__":
