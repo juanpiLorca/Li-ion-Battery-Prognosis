@@ -8,6 +8,32 @@ def remove_nan(arr):
         raise TypeError("Input must be a numpy array.")
     return arr[~np.isnan(arr)]
 
+def plot_params(t, Ro, qmax): 
+    """
+    Plots the battery parameters Ro and qmax over time.
+
+    :param t: Time vector (1D array)
+    :param Ro: Internal resistance (1D array)
+    :param qmax: Maximum charge capacity (1D array)
+    """
+    fig, axs = plt.subplots(2, 1, figsize=(12, 8), sharex=True)
+
+    axs[0].plot(t, Ro, label=r"$R_o(t)$", color='tab:blue', linewidth=2.0)
+    axs[0].set_ylabel("Internal Resistance [Ohm]", fontsize=12)
+    axs[0].set_title("Battery Internal Resistance Over Time", fontsize=14)
+    axs[0].grid(True, linestyle=':', alpha=0.6)
+    axs[0].legend(fontsize=10, loc='best')
+
+    axs[1].plot(t, qmax, label=r"$q_{max}(t)$", color='tab:orange', linewidth=2.0)
+    axs[1].set_xlabel("Time [s]", fontsize=12)
+    axs[1].set_ylabel("Maximum Charge Capacity [Ah]", fontsize=12)
+    axs[1].set_title("Battery Maximum Charge Capacity Over Time", fontsize=14)
+    axs[1].grid(True, linestyle=':', alpha=0.6)
+    axs[1].legend(fontsize=10, loc='best')
+
+    plt.tight_layout()
+    plt.savefig('imgs/ukf_battery_params.pdf', dpi=300)
+    plt.close()
 
 def plot_states(t, x_model, x_k):
     """

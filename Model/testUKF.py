@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from utils import plot_outputs, plot_states, compare_UKFs
+from utils import plot_outputs, plot_states, compare_UKFs, plot_params
 from UnscentedKalmanFilter import UKFLithiumBattery, BatteryUKF 
 from BatteryModels import BatteryCellPhy
 
@@ -50,6 +50,7 @@ def main():
         yh_k[ukfNasa.step_counter-1] = ukf.hx(x_est)[0]
 
     # --- Retrieve history ---
+    # x_k = [T Vo Vsn Vsp qnB qnS qpB qpS]
     x_k, y_k = ukfNasa.get_history()
     t = np.arange(len(voltage_measurements)) * dt
 
@@ -57,9 +58,13 @@ def main():
     plot_outputs(t, voltage_measurements, V_model, y_k)
     # --- Plot states ---
     plot_states(t, x_model, x_k)
-    # --- Compare UKFs ---
-    labels = ["UKF Local Implentation", "UKF FilterPy Lib."]
-    compare_UKFs(t, y_k, yh_k, label1=labels[0], label2=labels[1], V_ref=voltage_measurements)
+    # --- Plot Ro and qmax ---
+    Vo = x_k[:, 1]
+    Ro = Vo/current_inputs
+    qmax = np.sum(x_k[:, 4:8], axis=1)
+    plot_params(t, Ro, qmax)
+
+
 
 
 if __name__ == "__main__":
