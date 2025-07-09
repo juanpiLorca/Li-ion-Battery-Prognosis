@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 from utils import plot_outputs, plot_states, compare_UKFs, plot_params
@@ -68,4 +69,6 @@ def main():
 
 
 if __name__ == "__main__":
+    
+    os.makedirs('imgs', exist_ok=True)
     main()
